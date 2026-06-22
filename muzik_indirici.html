@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Müzik İndirici</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 500px; margin: 50px auto; padding: 20px; }
+        input[type="text"] { width: 100%; padding: 10px; margin-bottom: 10px; }
+        button { width: 100%; padding: 10px; background-color: #28a745; color: white; border: none; cursor: pointer; }
+        button:disabled { background-color: #cccccc; }
+        #message { margin-top: 15px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h2>🎵 YouTube MP3 İndirici</h2>
+    <input type="text" id="urlInput" placeholder="YouTube Video URL'sini yapıştırın...">
+    <button id="downloadBtn" onclick="startDownload()">İndir</button>
+    <div id="message"></div>
+
+    <script>
+        async function startDownload() {
+            const urlInput = document.getElementById('urlInput').value;
+            const messageDiv = document.getElementById('message');
+            const btn = document.getElementById('downloadBtn');
+
+            if (!urlInput) {
+                messageDiv.style.color = 'red';
+                messageDiv.innerText = 'Lütfen bir URL girin!';
+                return;
+            }
+
+            messageDiv.style.color = 'orange';
+            messageDiv.innerText = 'İndirme ve dönüştürme başladı, lütfen bekleyin... (Bu işlem biraz sürebilir)';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/download', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: urlInput })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'ok') {
+                    messageDiv.style.color = 'green';
+                    messageDiv.innerText = '✅ ' + data.message;
+                } else {
+                    messageDiv.style.color = 'red';
+                    messageDiv.innerText = '❌ Hata: ' + data.message;
+                }
+            } catch (error) {
+                messageDiv.style.color = 'red';
+                messageDiv.innerText = '❌ Sunucuyla iletişim kurulurken bir hata oluştu.';
+            } finally {
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
